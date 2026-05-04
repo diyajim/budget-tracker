@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Tracker</title>
+</head>
+<body>
+    <h1>Payment Methods</h1>
+    <h2>Read</h2>
+    <button onclick="loadAll()">Refresh</button>
+    <ul id="paymentmethodlist"></ul>
+
+    <h2>Add</h2>
+    <form id="create_form">
+        <input type="text" id="create_name" placeholder="name" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <h2>Update</h2> 
+    <form id="update_form">
+        <input type="text" id="update_id" placeholder="ID" required>
+        <input type="text" id="update_name" placeholder="New name" required>
+        <button type="submit"> Update</button>
+    </form>
+
+    <h2>Delete</h2>
+    <form id="delete_form">
+        <input type="text"id="delete_id" placeholder="ID" required>
+        <button type="submit">Delete </button>
+    </form>
+
+    <script>
+        const API = "http://localhost:3000";
+
+        async function loadAll() {
+            const result = await fetch(`${API}/paymentread`);
+            const rows = await result.json();
+            let html = "";
+            for (const r of rows) {
+                html = html + "<li>" + r.paymentmethodid + " - " + r.methodname + "</li>";
+            }
+            document.getElementById("paymentmethodlist").innerHTML = html;
+        }
+
+        document.getElementById("create_form").onsubmit = async (e) => {
+            e.preventDefault();
+            await fetch(`${API}/paymentcreate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    methodname: document.getElementById("create_name").value
+                })
+            });
+            loadAll();
+        };
+
+        document.getElementById("update_form").onsubmit = async (e) => {
+            e.preventDefault();
+            await fetch(`${API}/paymentupdate`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paymentmethodid: document.getElementById("update_id").value,
+                    methodname: document.getElementById("update_name").value
+                })
+            });
+            loadAll();
+        };
+
+        document.getElementById("delete_form").onsubmit = async (e) => {
+            e.preventDefault();
+            await fetch(`${API}/paymentdelete`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paymentmethodid: document.getElementById("delete_id").value
+                })
+            });
+            loadAll();
+        };
+
+        loadAll();
+    </script>
+</body>
+</html>
